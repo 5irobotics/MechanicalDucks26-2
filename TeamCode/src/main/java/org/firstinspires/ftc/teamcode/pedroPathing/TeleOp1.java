@@ -11,6 +11,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -28,10 +29,10 @@ public class TeleOp1 extends OpMode {
     private double slowModeMultiplier = 0.5;
     DcMotor IntakeMotor;
     DcMotor LauncherMotor;
-    Servo Gate_Servo;
+    CRServo SmallSupportServo;
     int IntakeFlag = 0;
     int LauncherFlag = 0;
-    int GateFlag = 0;
+    int SmallSupportServoFlag = 0;
     private Limelight3A limelight;
 
 
@@ -47,15 +48,15 @@ public class TeleOp1 extends OpMode {
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(130), 0.8))
                 .build();
         IntakeMotor = hardwareMap.get(DcMotor.class, "IntakeMotor");
+        SmallSupportServo = hardwareMap.get(CRServo.class, "");
         limelight = hardwareMap.get(Limelight3A.class,"LimeLight");
         LauncherMotor = hardwareMap.get(DcMotor.class, "LauncherMotor");
-        Gate_Servo = hardwareMap.get(Servo.class, "Gate_SERVO");
 
         telemetry.setMsTransmissionInterval(11);
 
         limelight.pipelineSwitch(0);
 
-        Gate_Servo.setPosition(0.5);
+
     }
 
     @Override

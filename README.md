@@ -1,4 +1,4 @@
-# FTC Banana Box 2025-2026 Decode
+# FTC Mechanical Ducks 2025-2026 Decode
 
 ## NOTICE
 
