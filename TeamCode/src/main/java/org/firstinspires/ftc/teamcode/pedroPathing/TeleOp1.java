@@ -30,9 +30,7 @@ public class TeleOp1 extends OpMode {
     DcMotor IntakeMotor;
     DcMotor LauncherMotor;
     CRServo SmallSupportServo;
-    int IntakeFlag = 0;
-    int LauncherFlag = 0;
-    int SmallSupportServoFlag = 0;
+    CRServo LargeSupportServo;
     private Limelight3A limelight;
 
 
@@ -48,7 +46,8 @@ public class TeleOp1 extends OpMode {
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(130), 0.8))
                 .build();
         IntakeMotor = hardwareMap.get(DcMotor.class, "IntakeMotor");
-        SmallSupportServo = hardwareMap.get(CRServo.class, "");
+        SmallSupportServo = hardwareMap.get(CRServo.class, "SmallSupportServo");
+        LargeSupportServo = hardwareMap.get(CRServo.class, "LargeSupportServo");
         limelight = hardwareMap.get(Limelight3A.class,"LimeLight");
         LauncherMotor = hardwareMap.get(DcMotor.class, "LauncherMotor");
 
@@ -76,6 +75,16 @@ public class TeleOp1 extends OpMode {
         follower.update();
         telemetryM.update();
 
+
+        move();
+
+        telemetryM.debug("position", follower.getPose());
+        telemetryM.debug("velocity", follower.getVelocity());
+        telemetryM.debug("automatedDrive", automatedDrive);
+
+    }
+
+    public void move(){
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
             //In case the drivers want to use a "slowMode" you can scale the vectors
@@ -97,81 +106,16 @@ public class TeleOp1 extends OpMode {
             );
         }
 
-       // Automated PathFollowing
-          if (gamepad1.aWasPressed()) {
-               follower.followPath(pathChain.get());
-               automatedDrive = true;
-           }
+        // Automated PathFollowing
+        if (gamepad1.aWasPressed()) {
+            follower.followPath(pathChain.get());
+            automatedDrive = true;
+        }
 
         //Stop automated following if the follower is done
-            if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
-               follower.startTeleopDrive();
-              automatedDrive = false;
-           }
-
-
-        if (gamepad1.xWasPressed()) {
-            if (IntakeFlag == 0) {
-                IntakeMotor.setPower(1);
-                IntakeFlag = 1;
-            }
-            else if (IntakeFlag == 1) {
-                IntakeMotor.setPower(0);
-                IntakeFlag = 0;
-            } else if (IntakeFlag == -1) {
-                IntakeMotor.setPower(0);
-                IntakeFlag = 0;
-            }
+        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
+            follower.startTeleopDrive();
+            automatedDrive = false;
         }
-
-        //Intake reverse
-
-        if (gamepad1.yWasPressed()) {
-            if (IntakeFlag == 0) {
-                IntakeMotor.setPower(-1);
-                IntakeFlag = -1;
-            } else if (IntakeFlag == -1) {
-                IntakeMotor.setPower(0);
-                IntakeFlag = 0;
-            } else if (IntakeFlag == 1) {
-                IntakeMotor.setPower(0);
-                IntakeFlag = 0;
-            }
-        }
-
-        if (gamepad2.dpadUpWasPressed()) {
-            if (LauncherFlag == 0) {
-                LauncherMotor.setPower(-1);
-                LauncherFlag = 1;
-            }
-            else if (LauncherFlag == 1) {
-                LauncherMotor.setPower(0);
-                LauncherFlag = 0;
-            }
-        }
-        if (gamepad2.dpadDownWasPressed()) {
-            if (LauncherFlag == 0) {
-                LauncherMotor.setPower(-0.75);
-                LauncherFlag = 1;
-            }
-            else if (LauncherFlag == 1) {
-                LauncherMotor.setPower(0);
-                LauncherFlag = 0;
-            }
-        }
-        if (gamepad2.aWasPressed()) {
-            if (GateFlag == 0) {
-                Gate_Servo.setPosition(0.35);
-                GateFlag = 1;
-            } else if (GateFlag == 1) {
-                Gate_Servo.setPosition(0.5);
-                GateFlag = 0;
-            }
-        }
-
-        telemetryM.debug("position", follower.getPose());
-        telemetryM.debug("velocity", follower.getVelocity());
-        telemetryM.debug("automatedDrive", automatedDrive);
-
     }
 }
