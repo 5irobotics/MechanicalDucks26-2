@@ -40,4 +40,13 @@ public class MiddlePart2 extends OpMode {
         }
 
     }
+
+
+    public void Hood(boolean HButtonOUT, boolean HButtonIN, CRServo Hood) {
+        if (HButtonOUT){
+            Hood.setPower(1);
+        } else if (HButtonIN) {
+            Hood.setPower(-1);
+        } else{Hood.setPower(0);}
+    }
 }
