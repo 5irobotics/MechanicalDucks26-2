@@ -17,17 +17,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
 
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(7)
-            .forwardZeroPowerAcceleration(-58.651152939910645)
-            .lateralZeroPowerAcceleration(-57.96368430902596)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.09, 0, 0.01, 0.03))
-            .headingPIDFCoefficients(new PIDFCoefficients(1,0,0.02,0.01))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.005,0,0.00001,0.6,0.01))
-            .centripetalScaling(0.0005);
+            .mass(9.96202243)
+//            .forwardZeroPowerAcceleration(-58.651152939910645)
+//            .lateralZeroPowerAcceleration(-57.96368430902596)
+//            .translationalPIDFCoefficients(new PIDFCoefficients(0.09, 0, 0.01, 0.03))
+//            .headingPIDFCoefficients(new PIDFCoefficients(1,0,0.02,0.01))
+//            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.005,0,0.00001,0.6,0.01))
+//            .centripetalScaling(0.0005)
+            ;
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(4.5)
-            .strafePodX(-2)
+            .forwardPodY(1.5)
+            .strafePodX(0.5)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("Pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
@@ -46,8 +47,9 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(56.89780936654158)
-            .yVelocity(50.46639173612821);
+//            .xVelocity(56.89780936654158)
+//            .yVelocity(50.46639173612821)
+            ;
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
