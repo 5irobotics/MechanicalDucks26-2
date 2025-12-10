@@ -13,6 +13,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.pedroPathing.ourcode.subsystems.MiddlePart2;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -21,102 +24,61 @@ import java.util.function.Supplier;
 @Configurable
 @TeleOp
 public class TeleOp1 extends OpMode {
-    private Follower follower;
-    public static Pose startingPose; //See ExampleAuto to understand how to use this
-    private boolean automatedDrive;
-    private Supplier<PathChain> pathChain;
-    private TelemetryManager telemetryM;
-    private boolean slowMode = false;
-    private double slowModeMultiplier = 0.5;
     DcMotor IntakeMotor;
     DcMotor LauncherMotor;
     CRServo SmallSupportServo;
     CRServo LargeSupportServo;
-    private Limelight3A limelight;
+    Servo Hood;
+    DcMotor FLeft;
+    DcMotor BLeft;
+    DcMotor BRight;
+    DcMotor FRight;
+
+    MiddlePart2 middle = new MiddlePart2();
 
 
     @Override
     public void init() {
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startingPose == null ? new Pose(41.02679830747532, 59.712270803949224, 180) : startingPose);
-        follower.update();
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(70.07052186177715, 66.00846262341325))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(130), 0.8))
-                .build();
         IntakeMotor = hardwareMap.get(DcMotor.class, "IntakeMotor");
         SmallSupportServo = hardwareMap.get(CRServo.class, "SmallSupportServo");
         LargeSupportServo = hardwareMap.get(CRServo.class, "LargeSupportServo");
-        limelight = hardwareMap.get(Limelight3A.class,"LimeLight");
+        Hood = hardwareMap.get(Servo.class, "LargeSupportServo");
         LauncherMotor = hardwareMap.get(DcMotor.class, "LauncherMotor");
 
-        telemetry.setMsTransmissionInterval(11);
+        FLeft = hardwareMap.get(DcMotor.class, "FLeft");
+        BLeft = hardwareMap.get(DcMotor.class, "BLeft");
+        FRight = hardwareMap.get(DcMotor.class, "FRight");
+        BRight = hardwareMap.get(DcMotor.class, "BRight");
 
-        limelight.pipelineSwitch(0);
 
-
-    }
-
-    @Override
-    public void start() {
-        //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
-        //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constant.java (for Mecanum)
-        //If you don't pass anything in, it uses the default (false)
-        follower.startTeleopDrive();
-        limelight.start();
     }
 
     @Override
     public void loop() {
 
+    middle.Shooter(gamepad2.y, gamepad2.b, LauncherMotor);
+    middle.Hood(gamepad2.dpad_down, gamepad2.dpad_up, Hood);
+    middle.Intake(gamepad2.right_stick_y, gamepad2.left_stick_y, gamepad2.left_stick_y, IntakeMotor, SmallSupportServo, LargeSupportServo);
 
-        //Call this once per loop
-        follower.update();
-        telemetryM.update();
+        double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+        double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+        double rx = gamepad1.right_stick_x;
+
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / denominator;
+        double backLeftPower = (y - x + rx) / denominator;
+        double frontRightPower = (y - x - rx) / denominator;
+        double backRightPower = (y + x - rx) / denominator;
+
+        FLeft.setPower(frontLeftPower);
+        BLeft.setPower(backLeftPower);
+        FRight.setPower(frontRightPower);
+        BRight.setPower(backRightPower);
 
 
-        move();
-
-        telemetryM.debug("position", follower.getPose());
-        telemetryM.debug("velocity", follower.getVelocity());
-        telemetryM.debug("automatedDrive", automatedDrive);
-
-    }
-
-    public void move(){
-        if (!automatedDrive) {
-            //Make the last parameter false for field-centric
-            //In case the drivers want to use a "slowMode" you can scale the vectors
-
-            //This is the normal version to use in the TeleOp
-            if (!slowMode) follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    true // Robot Centric
-            );
-
-                //This is how it looks with slowMode on
-            else follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * slowModeMultiplier,
-                    -gamepad1.left_stick_x * slowModeMultiplier,
-                    -gamepad1.right_stick_x * slowModeMultiplier,
-                    true // Robot Centric
-            );
-        }
-
-        // Automated PathFollowing
-        if (gamepad1.aWasPressed()) {
-            follower.followPath(pathChain.get());
-            automatedDrive = true;
-        }
-
-        //Stop automated following if the follower is done
-        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
-            follower.startTeleopDrive();
-            automatedDrive = false;
-        }
     }
 }

@@ -32,9 +32,9 @@ public class MiddlePart2 extends OpMode {
     public void Shooter(boolean shooterspeed1, boolean shooterspeed2
             , DcMotor shooter) {
         if (shooterspeed1) {
-            shooter.setPower(0.81);
+            shooter.setPower(0.9);
         } else if (shooterspeed2) {
-            shooter.setPower(0.70);
+            shooter.setPower(0.8);
         } else {
             shooter.setPower(0);
         }
@@ -42,11 +42,11 @@ public class MiddlePart2 extends OpMode {
     }
 
 
-    public void Hood(boolean HButtonOUT, boolean HButtonIN, CRServo Hood) {
+    public void Hood(boolean HButtonOUT, boolean HButtonIN, Servo Hood) {
         if (HButtonOUT){
-            Hood.setPower(1);
+            Hood.setPosition(1);
         } else if (HButtonIN) {
-            Hood.setPower(-1);
-        } else{Hood.setPower(0);}
+            Hood.setPosition(-1);
+        } else{Hood.setPosition(0);}
     }
 }
