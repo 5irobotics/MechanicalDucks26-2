@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.ourcode.subsystems.MiddlePart2;
@@ -22,7 +23,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.function.Supplier;
 
 @Configurable
-@TeleOp
+@TeleOp( name = "PLAY ME", group = "Z")
 public class TeleOp1 extends OpMode {
     DcMotor IntakeMotor;
     DcMotor LauncherMotor;
@@ -33,6 +34,7 @@ public class TeleOp1 extends OpMode {
     DcMotor BLeft;
     DcMotor BRight;
     DcMotor FRight;
+    CRServo Ramp;
 
     MiddlePart2 middle = new MiddlePart2();
 
@@ -40,16 +42,26 @@ public class TeleOp1 extends OpMode {
     @Override
     public void init() {
 
-        IntakeMotor = hardwareMap.get(DcMotor.class, "IntakeMotor");
+        IntakeMotor = hardwareMap.get(DcMotor.class, "Intake");
         SmallSupportServo = hardwareMap.get(CRServo.class, "SmallSupportServo");
         LargeSupportServo = hardwareMap.get(CRServo.class, "LargeSupportServo");
-        Hood = hardwareMap.get(Servo.class, "LargeSupportServo");
-        LauncherMotor = hardwareMap.get(DcMotor.class, "LauncherMotor");
+        Hood = hardwareMap.get(Servo.class, "Hood");
+        Ramp = hardwareMap.get(CRServo.class, "Ramp");
+        LauncherMotor = hardwareMap.get(DcMotor.class, "Shooter");
 
         FLeft = hardwareMap.get(DcMotor.class, "FLeft");
         BLeft = hardwareMap.get(DcMotor.class, "BLeft");
         FRight = hardwareMap.get(DcMotor.class, "FRight");
         BRight = hardwareMap.get(DcMotor.class, "BRight");
+
+        SmallSupportServo.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        FLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        BLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        FRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        BRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        LauncherMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
     }
@@ -58,8 +70,9 @@ public class TeleOp1 extends OpMode {
     public void loop() {
 
     middle.Shooter(gamepad2.y, gamepad2.b, LauncherMotor);
-    middle.Hood(gamepad2.dpad_down, gamepad2.dpad_up, Hood);
+    middle.Ramp(gamepad2.dpad_down, gamepad2.dpad_up, Ramp);
     middle.Intake(gamepad2.right_stick_y, gamepad2.left_stick_y, gamepad2.left_stick_y, IntakeMotor, SmallSupportServo, LargeSupportServo);
+    middle.Hood(gamepad2.right_bumper , gamepad2.left_bumper, Hood);
 
         double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
