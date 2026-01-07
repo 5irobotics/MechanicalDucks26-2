@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.ourcode; // make sure this aligns with class location
+package org.firstinspires.ftc.teamcode.pedroPathing.ourcode.auto; // make sure this aligns with class location
 
 import static android.os.SystemClock.sleep;
 

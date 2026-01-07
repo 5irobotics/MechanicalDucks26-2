@@ -1,9 +1,10 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.ourcode.subsystems;
+package org.firstinspires.ftc.teamcode.pedroPathing.ourcode.teleOp.subsystems;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="MIDDLEPART", group="DONTPLAY")
@@ -30,11 +31,11 @@ public class MiddlePart2 extends OpMode {
 
 
     public void Shooter(boolean shooterspeed1, boolean shooterspeed2
-            , DcMotor shooter) {
+            , DcMotorEx shooter) {
         if (shooterspeed1) {
-            shooter.setPower(1);
+            shooter.setVelocity(1900);
         } else if (shooterspeed2) {
-            shooter.setPower(0.95);
+            shooter.setVelocity(1200);
         } else {
             shooter.setPower(0);
         }
