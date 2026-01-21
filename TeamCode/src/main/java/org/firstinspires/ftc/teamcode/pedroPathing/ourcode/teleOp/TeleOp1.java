@@ -6,13 +6,14 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.teamcode.pedroPathing.ourcode.teleOp.subsystems.MiddlePart2;
 
 @Configurable
 @TeleOp( name = "Meet2TeleOp", group = "Z")
 public class TeleOp1 extends OpMode {
+    double F = 0.8592;
+    double P = 5.9890;
     DcMotor IntakeMotor;
     DcMotorEx LauncherMotor;
     CRServo SmallSupportServo;
@@ -24,7 +25,7 @@ public class TeleOp1 extends OpMode {
     DcMotor FRight;
     CRServo Ramp;
 
-    MiddlePart2 middle = new MiddlePart2();
+    org.firstinspires.ftc.teamcode.pedroPathing.ourcode.teleOp.MiddlePart2 middle = new org.firstinspires.ftc.teamcode.pedroPathing.ourcode.teleOp.MiddlePart2();
 
 
     @Override
@@ -62,6 +63,10 @@ public class TeleOp1 extends OpMode {
     middle.Intake(-gamepad2.right_stick_y, gamepad2.left_stick_y, gamepad2.left_stick_y, IntakeMotor, SmallSupportServo, LargeSupportServo);
     middle.Hood(gamepad2.right_bumper, gamepad2.left_bumper, Hood);
 
+    PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+    LauncherMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+
+
         double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
         double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
         double rx = gamepad1.right_stick_x;
@@ -79,6 +84,9 @@ public class TeleOp1 extends OpMode {
         BLeft.setPower(backLeftPower);
         FRight.setPower(frontRightPower);
         BRight.setPower(backRightPower);
+
+
+
 
 
 
