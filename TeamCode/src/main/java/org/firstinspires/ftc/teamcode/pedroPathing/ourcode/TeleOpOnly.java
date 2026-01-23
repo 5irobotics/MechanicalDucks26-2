@@ -44,17 +44,19 @@ public class TeleOpOnly extends OpMode {
         BRight.setPower(drive + strafe - turn);
 
         IntakeMotor.setPower(gamepad2.left_stick_y);
-        SmallSupportServo.setPower(gamepad2.right_stick_y);
-        LargeSupportServo.setPower(gamepad2.right_stick_y);
+        
 
-        // Simple shooting
+        if(gamepad2.y){Shooter.setVelocity(2250)}
+        else if(gamepad.b){Shooter.setVelocity(2100)}
+        else if(gamepad.a){Shooter.setVelocity(0)}
+
+        
         if (gamepad2.x) {
-            Shooter.setVelocity(2000);
             SmallSupportServo.setPower(1.0);
             LargeSupportServo.setPower(1.0);
-        } else {
-            SmallSupportServo.setPower(0);
-            LargeSupportServo.setPower(0);
+        } else{
+            SmallSupportServo.setPower(gamepad2.right_stick_y);
+            LargeSupportServo.setPower(gamepad2.right_stick_y);
         }
     }
 }
