@@ -1,10 +1,9 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.ourcode.teleOp;
+package org.firstinspires.ftc.teamcode.pedroPathing.ourcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.*;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="AUTO + TELEOP MENU", group="Z")
 public class AutoTeleOp extends OpMode {
