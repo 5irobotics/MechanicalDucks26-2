@@ -12,7 +12,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 public class TeleOpOnly extends OpMode {
 
     private DcMotor FLeft, BLeft, FRight, BRight;
-    private DcMotor IntakeMotor;
+    private DcMotor IntakeMotor, Support;
     private DcMotorEx Shooter;
     private CRServo SmallSupportServo, LargeSupportServo, Ramp;
     private Limelight3A limelight;
@@ -22,15 +22,19 @@ public class TeleOpOnly extends OpMode {
     private enum ShootState { IDLE, RAMP_UP, FEEDING, RESET_RAMP }
     private ShootState currentShootState = ShootState.IDLE;
 
+    // --- SUPPORT TOGGLE ---
+    private boolean supportToggleOn = false;
+    private boolean lastXState = false;
+
     // --- TUNING CONSTANTS ---
-    final double SNAP_KP = 0.035; 
-    final double X_OFFSET = -3.5; 
+    final double SNAP_KP = 0.035;
+    final double X_OFFSET = -3.5;
     final double MIN_TURN_POWER = 0.05;
 
     // Sequence Timings
     final double SHOOTER_WAIT_TIME = 0.8;
-    final double FEED_DURATION = 2.5;   
-    final double RAMP_RESET_TIME = 0.5; 
+    final double FEED_DURATION = 6;
+    final double RAMP_RESET_TIME = 0.5;
 
     @Override
     public void init() {
@@ -53,24 +57,37 @@ public class TeleOpOnly extends OpMode {
         FRight.setDirection(DcMotor.Direction.FORWARD);
         BRight.setDirection(DcMotor.Direction.FORWARD);
         Shooter.setDirection(DcMotor.Direction.REVERSE);
+        Ramp.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        PIDFCoefficients pidfCoefficients =
+                new PIDFCoefficients(5.986, 0, 0, 0.896);
+        Shooter.setPIDFCoefficients(
+                DcMotorEx.RunMode.RUN_USING_ENCODER,
+                pidfCoefficients
+        );
     }
 
     @Override
     public void loop() {
-        // --- 1. DRIVE LOGIC & SLOW MODE ---
+
+        // =========================
+        // 1. DRIVE
+        // =========================
         double drive = -gamepad1.left_stick_y;
         double strafe = gamepad1.left_stick_x;
         double turn = gamepad1.right_stick_x;
 
-        // Slow Mode: If Left Bumper is held, cut power to 30% for precision
-        double speedMultiplier = gamepad1.left_bumper ? 0.3 : 1.0;
+        double speedMultiplier = gamepad1.left_bumper ? 0.3 : 0.9;
 
-        // Auto-Align (Button A)
+        // Auto-align
         if (gamepad1.a) {
             LLResult result = limelight.getLatestResult();
             if (result != null && result.isValid()) {
                 double error = result.getTx() - X_OFFSET;
-                turn = Range.clip((error * SNAP_KP) + (Math.signum(error) * MIN_TURN_POWER), -0.6, 0.6);
+                turn = Range.clip(
+                        (error * SNAP_KP) + (Math.signum(error) * MIN_TURN_POWER),
+                        -0.6, 0.6
+                );
             }
         }
 
@@ -79,17 +96,30 @@ public class TeleOpOnly extends OpMode {
         FRight.setPower((drive - strafe - turn) * speedMultiplier);
         BRight.setPower((drive + strafe - turn) * speedMultiplier);
 
-        // --- 2. EMERGENCY CANCEL ---
-        // Pressing B on Gamepad 1 or Left Bumper on Gamepad 2 kills the sequence
+        // =========================
+        // 2. SUPPORT TOGGLE (X)
+        // =========================
+        boolean currentX = gamepad2.x;
+        if (currentX && !lastXState) {
+            supportToggleOn = !supportToggleOn;
+        }
+        lastXState = currentX;
+
+        // =========================
+        // 3. EMERGENCY CANCEL
+        // =========================
         if (gamepad2.left_bumper) {
             currentShootState = ShootState.IDLE;
-            Shooter.setVelocity(0);
-            Ramp.setPower(0);
+
+
             SmallSupportServo.setPower(0);
             LargeSupportServo.setPower(0);
+            supportToggleOn = false;
         }
 
-        // --- 3. AUTO-SHOOT STATE MACHINE (Button X) ---
+        // =========================
+        // 4. AUTO SHOOT SEQUENCE
+        // =========================
         switch (currentShootState) {
             case IDLE:
                 if (gamepad2.x) {
@@ -99,7 +129,6 @@ public class TeleOpOnly extends OpMode {
                 break;
 
             case RAMP_UP:
-                Shooter.setVelocity(2250);
                 if (shootTimer.seconds() >= SHOOTER_WAIT_TIME) {
                     shootTimer.reset();
                     currentShootState = ShootState.FEEDING;
@@ -107,11 +136,10 @@ public class TeleOpOnly extends OpMode {
                 break;
 
             case FEEDING:
-                Shooter.setVelocity(2250);
-                Ramp.setPower(1.0); 
+                Ramp.setPower(1.0);
                 SmallSupportServo.setPower(1.0);
-                LargeSupportServo.setPower(1.0);
-                
+                LargeSupportServo.setPower(-1.0);
+
                 if (shootTimer.seconds() >= FEED_DURATION) {
                     shootTimer.reset();
                     currentShootState = ShootState.RESET_RAMP;
@@ -120,10 +148,10 @@ public class TeleOpOnly extends OpMode {
 
             case RESET_RAMP:
                 Shooter.setVelocity(0);
-                Ramp.setPower(-1.0); // Retract Ramp
+                Ramp.setPower(-1.0);
                 SmallSupportServo.setPower(0);
                 LargeSupportServo.setPower(0);
-                
+
                 if (shootTimer.seconds() >= RAMP_RESET_TIME) {
                     Ramp.setPower(0);
                     currentShootState = ShootState.IDLE;
@@ -131,22 +159,45 @@ public class TeleOpOnly extends OpMode {
                 break;
         }
 
-        // --- 4. MANUAL CONTROLS & INTAKE ---
-        IntakeMotor.setPower(gamepad2.left_stick_y);
+        // =========================
+        // 5. INTAKE & SHOOTER (ALWAYS ACTIVE)
+        // =========================
+        IntakeMotor.setPower(gamepad2.right_stick_y);
 
+        if (gamepad2.y) Shooter.setVelocity(2250);
+        else if (gamepad2.b) Shooter.setVelocity(2100);
+        else if (gamepad2.a) Shooter.setVelocity(0);
+
+        // =========================
+        // 6. RAMP & SUPPORT CONTROL
+        // =========================
         if (currentShootState == ShootState.IDLE) {
-            // Manual Shooter
-            if (gamepad2.y) Shooter.setVelocity(2250);
-            else if (gamepad2.b) Shooter.setVelocity(2100);
-            else if (gamepad2.a) Shooter.setVelocity(0);
 
-            // Manual Support/Ramp Override
-            SmallSupportServo.setPower(gamepad2.right_stick_y);
-            LargeSupportServo.setPower(gamepad2.right_stick_y);
+            if (supportToggleOn) {
+                // TOGGLE ON
+                Ramp.setPower(1.0);
+                SmallSupportServo.setPower(1.0);
+                LargeSupportServo.setPower(-1.0);
+
+            } else {
+                // MANUAL
+                if (gamepad2.dpad_up) Ramp.setPower(1.0);
+                else if (gamepad2.dpad_down) Ramp.setPower(0);
+
+
+                SmallSupportServo.setPower(-gamepad2.left_stick_y);
+                LargeSupportServo.setPower(gamepad2.left_stick_y);
+            }
         }
 
-        telemetry.addData("Status", currentShootState);
-        telemetry.addData("Drivetrain", speedMultiplier < 1.0 ? "SLOW MODE" : "NORMAL");
+        // =========================
+        // 7. TELEMETRY
+        // =========================
+        telemetry.addData("Shoot State", currentShootState);
+        telemetry.addData("Support Mode",
+                supportToggleOn ? "TOGGLE ON" : "MANUAL");
+        telemetry.addData("Drive Mode",
+                speedMultiplier < 1.0 ? "SLOW" : "NORMAL");
         telemetry.update();
     }
 }
