@@ -12,9 +12,9 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 public class TeleOpOnly extends OpMode {
 
     private DcMotor FLeft, BLeft, FRight, BRight;
-    private DcMotor IntakeMotor, Support;
+    private DcMotor IntakeMotor, HelpingIntake;
     private DcMotorEx Shooter;
-    private CRServo SmallSupportServo, LargeSupportServo, Ramp;
+    private CRServo Ramp;
     private Limelight3A limelight;
 
     // --- TIMING & STATES ---
@@ -44,8 +44,9 @@ public class TeleOpOnly extends OpMode {
         BRight = hardwareMap.get(DcMotor.class, "BRight");
         IntakeMotor = hardwareMap.get(DcMotor.class, "Intake");
         Shooter = hardwareMap.get(DcMotorEx.class, "Shooter");
-        SmallSupportServo = hardwareMap.get(CRServo.class, "SmallSupportServo");
-        LargeSupportServo = hardwareMap.get(CRServo.class, "LargeSupportServo");
+        HelpingIntake = hardwareMap.get(DcMotor.class, "HelpingIntake");
+        //SmallSupportServo = hardwareMap.get(CRServo.class, "SmallSupportServo");
+        //LargeSupportServo = hardwareMap.get(CRServo.class, "LargeSupportServo");
         Ramp = hardwareMap.get(CRServo.class, "Ramp");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -112,8 +113,7 @@ public class TeleOpOnly extends OpMode {
             currentShootState = ShootState.IDLE;
 
 
-            SmallSupportServo.setPower(0);
-            LargeSupportServo.setPower(0);
+            HelpingIntake.setPower(0);
             supportToggleOn = false;
         }
 
@@ -137,8 +137,7 @@ public class TeleOpOnly extends OpMode {
 
             case FEEDING:
                 Ramp.setPower(1.0);
-                SmallSupportServo.setPower(1.0);
-                LargeSupportServo.setPower(-1.0);
+                HelpingIntake.setPower(-1);
 
                 if (shootTimer.seconds() >= FEED_DURATION) {
                     shootTimer.reset();
@@ -149,8 +148,7 @@ public class TeleOpOnly extends OpMode {
             case RESET_RAMP:
                 Shooter.setVelocity(0);
                 Ramp.setPower(-1.0);
-                SmallSupportServo.setPower(0);
-                LargeSupportServo.setPower(0);
+                HelpingIntake.setPower(0);
 
                 if (shootTimer.seconds() >= RAMP_RESET_TIME) {
                     Ramp.setPower(0);
@@ -163,6 +161,7 @@ public class TeleOpOnly extends OpMode {
         // 5. INTAKE & SHOOTER (ALWAYS ACTIVE)
         // =========================
         IntakeMotor.setPower(gamepad2.right_stick_y);
+        HelpingIntake.setPower(-gamepad2.right_stick_y);
 
         if (gamepad2.y) Shooter.setVelocity(2250);
         else if (gamepad2.b) Shooter.setVelocity(2100);
@@ -176,8 +175,7 @@ public class TeleOpOnly extends OpMode {
             if (supportToggleOn) {
                 // TOGGLE ON
                 Ramp.setPower(1.0);
-                SmallSupportServo.setPower(1.0);
-                LargeSupportServo.setPower(-1.0);
+                HelpingIntake.setPower(1);
 
             } else {
                 // MANUAL
@@ -185,8 +183,7 @@ public class TeleOpOnly extends OpMode {
                 else if (gamepad2.dpad_down) Ramp.setPower(0);
 
 
-                SmallSupportServo.setPower(-gamepad2.left_stick_y);
-                LargeSupportServo.setPower(gamepad2.left_stick_y);
+                HelpingIntake.setPower(gamepad2.left_stick_y);
             }
         }
 
