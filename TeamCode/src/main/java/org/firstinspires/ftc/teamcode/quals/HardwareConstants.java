@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.*;
 
 public class HardwareConstants {
 
+
     // ===== DRIVE MOTORS =====
     public DcMotor FLeft, BLeft, FRight, BRight;
 
@@ -14,16 +15,14 @@ public class HardwareConstants {
 
     // ===== CONSTANTS =====
     public final double SHOOT_VELOCITY = 2150;
-    public final double RAMP_TIME_FIRST = 3.5;   // Longer ramp for the very first ball
-    public final double RAMP_TIME_RECOVERY = 2.2; // Shorter ramp to recover speed between balls
-    public final double RAMP_TIME = 2.75; // Legacy constant if needed elsewhere
-    public final double FEED_TIME = 2.0;
+    public final double RAMP_TIME_FIRST = 3.5;   // Longer ramp/feed for the very first ball
+    public final double RAMP_TIME_RECOVERY = 2.1; // Shorter ramp/feed for recovery
+    public final double FEED_TIME = 3.2;
+    public final double FEED_TIME_FIRST = 1.4;
     public final double SUPPORT_SPEED = 1.0;
     public final double SLOW_MODE_MULTIPLIER = 0.3;
 
     // ===== PIDF CONSTANTS (Tune these!) =====
-    // F: Feedforward (The power needed to maintain velocity)
-    // P: Proportional (The power added based on how far off you are)
     public double SHOOTER_P = 5.9890;
     public double SHOOTER_I = 0.0;
     public double SHOOTER_D = 0.0;
@@ -59,11 +58,15 @@ public class HardwareConstants {
     }
 
     // ===== HELPER METHODS =====
+    public void setDrivePower(double power) {
+        FLeft.setPower(power);
+        BLeft.setPower(power);
+        FRight.setPower(power);
+        BRight.setPower(power);
+    }
+
     public void stopDrive() {
-        FLeft.setPower(0);
-        BLeft.setPower(0);
-        FRight.setPower(0);
-        BRight.setPower(0);
+        setDrivePower(0);
     }
 
     public void stopAll() {

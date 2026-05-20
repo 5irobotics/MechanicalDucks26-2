@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.quals;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -75,6 +75,7 @@ public class TeleOpForQual extends OpMode {
                 robot.Shooter.setVelocity(targetVelocity);
                 // Use a longer ramp time for the very first ball, and a shorter recovery time for others
                 double currentRampTime = (ballsShot == 0) ? robot.RAMP_TIME_FIRST : robot.RAMP_TIME_RECOVERY;
+
                 
                 if (actionTimer.seconds() >= currentRampTime) {
                     actionTimer.reset();
@@ -83,13 +84,13 @@ public class TeleOpForQual extends OpMode {
                 break;
 
             case SHOOT_FEED:
+                double currentFeedTime = (ballsShot == 0) ? robot.FEED_TIME_FIRST : robot.FEED_TIME/ballsToShoot;
                 robot.Shooter.setVelocity(targetVelocity);
 
                 robot.BottomSupport.setPower(robot.SUPPORT_SPEED);
                 robot.TopSupport.setPower(robot.SUPPORT_SPEED);
-                
 
-                if (actionTimer.seconds() >= robot.RAMP_TIME_RECOVERY/ballsToShoot) {
+                if (actionTimer.seconds() >= currentFeedTime) {
                     robot.BottomSupport.setPower(0);
                     robot.TopSupport.setPower(0);
                     ballsShot++;
@@ -116,13 +117,18 @@ public class TeleOpForQual extends OpMode {
             currentState = State.RESET;
         }
 
-        if (currentState == State.IDLE && Math.abs(gamepad2.right_stick_y) > 0.1) {
-            robot.BottomSupport.setPower(-gamepad2.right_stick_y);
-            robot.TopSupport.setPower(-gamepad2.right_stick_y);
-        } else if (currentState == State.IDLE) {
-            robot.BottomSupport.setPower(0);
-            robot.TopSupport.setPower(0);
-        }
+        robot.IntakeMotor.setPower(gamepad2.left_stick_y);
+
+        robot.BottomSupport.setPower(-gamepad2.right_stick_y);
+        robot.TopSupport.setPower(-gamepad2.right_stick_y);
+
+//        if (currentState == State.IDLE && Math.abs(gamepad2.right_stick_y) > 0.1) {
+//            robot.BottomSupport.setPower(-gamepad2.right_stick_y);
+//            robot.TopSupport.setPower(-gamepad2.right_stick_y);
+//        } else if (currentState == State.IDLE) {
+//            robot.BottomSupport.setPower(0);
+//            robot.TopSupport.setPower(0);
+//        }
 
         // Telemetry
         telemetry.addData("State", currentState);
