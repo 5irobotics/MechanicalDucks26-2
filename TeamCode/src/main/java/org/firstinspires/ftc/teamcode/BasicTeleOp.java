@@ -28,7 +28,7 @@ public class BasicTeleOp extends LinearOpMode {
         while (opModeIsActive()) {
 
             double drive = gamepad1.left_stick_y;
-            double strafe = gamepad1.left_stick_x;
+            double strafe = gamepad1.left_stick_x; //:)
             double turn = gamepad1.right_stick_x;
 
             FLeft.setPower((drive + strafe + turn));

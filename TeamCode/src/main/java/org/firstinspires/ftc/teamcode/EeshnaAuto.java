@@ -190,7 +190,7 @@ public class EeshnaAuto extends LinearOpMode {
         fLeft.setPower(0);
         bRight.setPower(0);
         fRight.setPower(0);
-
+//:)
         bLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

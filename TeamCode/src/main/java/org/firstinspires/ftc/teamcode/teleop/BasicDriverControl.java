@@ -30,7 +30,7 @@ public class BasicDriverControl extends LinearOpMode {
 // --- Drivetrain control ---
             double forward = gamepad1.right_stick_y; // forward/backward
             double turn = gamepad1.left_stick_x; // rotation
-            double strafe = gamepad1.right_stick_x; // strafing
+            double strafe = gamepad1.right_stick_x; // strafing :)
 
             double frontLeftPower = forward + turn + strafe;
             double backLeftPower = forward + turn - strafe;
